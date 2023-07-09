@@ -1,17 +1,21 @@
 const board = document.querySelector("chess-board");
 const game = new Chess();
 
+function getPostion(str) {
+  return str.replace(/[+-]/g, "").substr(-2);
+}
+
 function swapPlayer(fen) {
   const isWhite = fen.includes(" w ");
   return isWhite ? fen.replace(" w ", " b ") : fen.replace(" b ", " w ");
 }
 
 function isProtected(move) {
-  pos = move.substr(-2);
+  pos = getPosition(move)
   const myPossibleMoves = game
     .moves()
     .filter((item) => item != move)
-    .map((item) => item.substr(-2));
+    .map((item) => getPosition(item));
 
   //TODO include protectedByPawn using game.board() analysis
 
@@ -20,24 +24,24 @@ function isProtected(move) {
 
 function isVulnerable(move) {
   game.move(move);
-  const attacks = game.moves().map((item) => item.substr(-2));
+  const attacks = game.moves().map((item) => getPosition(item));
   game.undo();
-  const pos = move.substr(-2);
+  const pos = getPosition(move);
   return attacks.includes(pos);
 }
 
 function isEmpty(move) {
-  const pos = move.substr(-2);
+  const pos = getPosition(move));
   return !chess.get(pos);
 }
 function isBlack(move) {
-  const pos = move.substr(-2);
+  const pos = getPosition(move);
   return chess.get(pos).includes("b");
 }
 
 function getTargetValue(move) {
   const values = "0PNBRQK";
-  const pos = move.replace(/[+-]/g, "").substr(-2);
+  const pos = getPosition(move);
   const value = game.get(pos)?.type;
   return value ? values.indexOf(value.toUpperCase()) : null;
 }
@@ -76,7 +80,7 @@ function makeSmartMove() {
 }
 
 function TakePiece() {
-  const take = game.moves().map((item) => item.substr(-2));
+  const take = game.moves().map((item) => getPosition(item));
   game.undo;
   return take;
 }
