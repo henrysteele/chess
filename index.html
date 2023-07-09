@@ -1,27 +1,30 @@
+<html>
+  <head>
+    <script
+      type="module"
+      src="https://unpkg.com/chessboard-element?module"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+  <body>
+    <chess-board
+      style="width: 400px"
+      position="start"
+      draggable-pieces
+    ></chess-board>
 
+    <label>Status:</label>
+    <div id="status"></div>
+    <label>FEN:</label>
+    <div id="fen"></div>
+    <label>PGN:</label>
+    <div id="pgn"></div>
 
-<html><head>
-<script type="module" src="https://unpkg.com/chessboard-element?module"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
-</head><body>
-    
-<chess-board
-style="width: 400px"
-position="start"
-draggable-pieces></chess-board>
-
-<label>Status:</label>
-<div id="status"></div>
-<label>FEN:</label>
-<div id="fen"></div>
-<label>PGN:</label>
-<div id="pgn"></div>
-
-
-
-</body>
-<script  src="./js/code.js"></script>
-
+    <button id="clearBtn">Clear Board</button>
+  </body>
+  <script src="./js/code.js"></script>
 </html>
