@@ -40,8 +40,7 @@ function isVulnerablePosition(pos) {
   return attacks.length > 0
 }
 
-function allMyPositions() {
-  const myColor = game.turn()
+function boardWithSquares() {
   const board = game.board()
   const rows = [8, 7, 6, 5, 4, 3, 2, 1]
   const cols = "abcdefgh".split("")
@@ -53,19 +52,18 @@ function allMyPositions() {
       board[row][col].square = cols[col] + rows[row]
     }
   }
+
+  return board
+}
+
+function allMyPositions() {
+  const myColor = game.turn()
+  const board = boardWithSquares()
+
   const flatBoard = board.flat().filter((item) => !!item)
   return flatBoard
     .filter((item) => item?.color == myColor)
     .map((item) => item?.square)
-}
-
-function isEmpty(move) {
-  const pos = getPosition(move)
-  return !chess.get(pos)
-}
-function isBlack(move) {
-  const pos = getPosition(move)
-  return chess.get(pos).includes("b")
 }
 
 function getTargetValue(move) {
@@ -117,14 +115,7 @@ function bestDefensiveMove() {
   return sortRoyalFirst(moves)[0]
 }
 
-function makeSmartMove() {
-  let possibleMoves = game.moves()
-
-  // game over
-  if (possibleMoves.length === 0) {
-    return
-  }
-
+function tryMove(possibleMoves = game.moves()) {
   const myMove =
     bestDefensiveMove() ||
     safeMeanMoves(possibleMoves)[0] ||
@@ -132,6 +123,29 @@ function makeSmartMove() {
     sortPawnsFirst(possibleMoves)[0]
 
   game.move(myMove)
+}
+
+function makeSmartMove() {
+  const possibleMoves = game.moves()
+
+  // game over
+  if (possibleMoves.length === 0) {
+    return
+  }
+
+  tryMove()
+
+  // ensure we don't repeat our last move
+  const history = game.history()
+  if (history.length > 4) {
+    const priorMoves = history.slice(-5)
+    if (priorMoves[0] == priorMoves[4]) {
+      game.undo()
+      const possibleMoves = game.moves().filter((move) => move != priorMoves[0])
+      tryMove(possibleMoves)
+    }
+  }
+
   board.setPosition(game.fen())
 }
 
@@ -147,10 +161,10 @@ board.addEventListener("drag-start", (e) => {
   }
 
   // only pick up pieces for White
-  if (piece.search("b") > -1) {
-    e.preventDefault()
-    return
-  }
+  // if (piece.search("b") > -1) {
+  //   e.preventDefault()
+  //   return
+  // }
 })
 
 document.addEventListener("keyup", function (event) {
@@ -196,3 +210,28 @@ function sortPawnsFirst(moves) {
 board.addEventListener("snap-end", (e) => {
   board.setPosition(game.fen())
 })
+
+document.addEventListener("keyup", function (event) {
+  // console.log(event.code)
+  if (event.code == "Space") {
+    makeSmartMove()
+  }
+})
+
+setInterval(function () {
+  const fen = game.fen()
+  const old = document.getElementById("fen").innerHTML
+  if (fen == old) return
+
+  document.getElementById("fen").innerHTML = fen
+  document.getElementById("status").innerHTML =
+    (game.in_checkmate() && "checkmate") ||
+    (game.in_stalemate() && "stalemate") ||
+    (game.insufficient_material() && "insufficient material") ||
+    (game.in_check() && "in check") ||
+    (game.in_draw() && "draw") ||
+    (game.game_over() && "gameover") ||
+    game.turn() == "b"
+      ? "black's turn"
+      : "white's turn"
+}, 500)
